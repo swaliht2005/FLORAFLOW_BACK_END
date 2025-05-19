@@ -1,21 +1,34 @@
 
 
-const express = require("express");
+const express = require('express');
 const {
   addSellerProduct,
   updateSellerProduct,
   deleteSellerProduct,
   getAllSellerProducts,
   getSellerProductById,
-} = require("../controllers/SellerController");
-const { upload } = require("../middlewares/fileUploadMiddleware");
+  getSellerProductImage,
+} = require('../controllers/SellerController');
+const upload = require('../middlewares/fileUploadMiddleware'); // Import Multer instance directly
 
 const router = express.Router();
 
-router.post("/add", upload, addSellerProduct); // Use upload directly since it's pre-configured with .single
-router.get("/", getAllSellerProducts);
-router.get("/:id", getSellerProductById);
-router.put("/:id", upload, updateSellerProduct); // Use upload directly
-router.delete("/:id", deleteSellerProduct);
+// Multer error handling middleware
+const handleMulterErrors = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+  if (err.message === 'Only image files are allowed') {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+  next(err);
+};
+
+router.post('/add', upload.single('PlantImage'), handleMulterErrors, addSellerProduct);
+router.put('/:id', upload.single('PlantImage'), handleMulterErrors, updateSellerProduct);
+router.get('/', getAllSellerProducts);
+router.get('/:id', getSellerProductById);
+router.get('/:id/image', getSellerProductImage);
+router.delete('/:id', deleteSellerProduct);
 
 module.exports = { sellerRouter: router };
