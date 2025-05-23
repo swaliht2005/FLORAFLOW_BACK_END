@@ -1,12 +1,10 @@
 
-
+const mongoose = require('mongoose');
 const Seller = require('../model/sellerModel');
 const path = require('path');
 const fs = require('fs');
 
 const addSellerProduct = async (req, res) => {
-  console.log('Request body:', req.body);
-  console.log('Request file:', req.file);
   try {
     const { PlantName, PlantingDay, PlantingHeight, price, PlantAbout } = req.body || {};
 
@@ -25,7 +23,6 @@ const addSellerProduct = async (req, res) => {
       return res.status(400).json({ success: false, error: 'No image file uploaded' });
     }
 
-    // Verify and process image
     const filePath = path.join(__dirname, '..', 'Uploads', req.file.filename);
     if (!fs.existsSync(filePath)) {
       console.error(`File not found at: ${filePath}`);
@@ -39,7 +36,7 @@ const addSellerProduct = async (req, res) => {
       PlantName,
       PlantingDay,
       PlantingHeight,
-      price: parseFloat(price), // Ensure price is a number
+      price: parseFloat(price),
       PlantAbout,
       PlantImage: {
         data: imageData,
@@ -48,16 +45,14 @@ const addSellerProduct = async (req, res) => {
     });
     await plant.save();
 
-    // Clean up temporary file
     fs.unlinkSync(filePath);
 
-    // Return the product with an image URL
     res.json({
       success: true,
       message: 'Product added successfully!',
       data: {
         ...plant.toObject(),
-        url: `/api/seller/image/${plant._id}`, // Add image URL
+        imageUrl: `http://localhost:5000/api/seller/${plant._id}/image`, // Match Cards format
       },
     });
   } catch (error) {
@@ -70,7 +65,6 @@ const updateSellerProduct = async (req, res) => {
   try {
     const { PlantName, PlantingDay, PlantingHeight, price, PlantAbout } = req.body || {};
 
-    // Validation
     const errors = [];
     if (!PlantName) errors.push('Plant name is required');
     if (!PlantingDay) errors.push('Planting day is required');
@@ -116,7 +110,7 @@ const updateSellerProduct = async (req, res) => {
       success: true,
       data: {
         ...updatedPlant.toObject(),
-        url: `/api/seller/image/${updatedPlant._id}`, // Add image URL
+        imageUrl: `http://localhost:5000/api/seller/${updatedPlant._id}/image`,
       },
     });
   } catch (error) {
@@ -143,18 +137,17 @@ const getAllSellerProducts = async (req, res) => {
     const { search } = req.query;
     let query = {};
     if (search) {
-      query.PlantName = { $regex: search, $options: 'i' }; // Case-insensitive search
+      query.PlantName = { $regex: search, $options: 'i' };
     }
 
     const products = await Seller.find(query).sort({ createdAt: -1 });
 
-    // Add image URLs to each product
     const productsWithUrls = products.map((product) => ({
       ...product.toObject(),
-      url: `/api/seller/image/${product._id}`,
+      imageUrl: `http://localhost:5000/api/seller/${product._id}/image`,
     }));
 
-    res.json(productsWithUrls); // Return array directly
+    res.json(productsWithUrls); // Return array directly for Cards
   } catch (error) {
     console.error('Error retrieving products:', error);
     res.status(500).json({ success: false, error: 'Server error' });
@@ -171,7 +164,7 @@ const getSellerProductById = async (req, res) => {
       success: true,
       data: {
         ...product.toObject(),
-        url: `/api/seller/image/${product._id}`, // Add image URL
+        imageUrl: `http://localhost:5000/api/seller/${product._id}/image`,
       },
     });
   } catch (error) {

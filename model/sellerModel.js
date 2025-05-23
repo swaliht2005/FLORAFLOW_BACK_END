@@ -1,5 +1,4 @@
 
-
 const mongoose = require('mongoose');
 
 const sellerSchema = new mongoose.Schema({
@@ -9,8 +8,8 @@ const sellerSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   PlantAbout: { type: String, required: true },
   PlantImage: {
-    data: { type: Buffer }, // Store image as binary
-    contentType: { type: String }, // e.g., 'image/jpeg'
+    data: { type: Buffer },
+    contentType: { type: String },
   },
   createdAt: { type: Date, default: Date.now },
 });

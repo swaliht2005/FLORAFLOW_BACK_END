@@ -1,10 +1,22 @@
 
 const express = require('express');
-const userController = require('../controllers/user');
-
+const path = require('path');
 const router = express.Router();
 
-router.post('/register', userController.register);
-router.post('/login', userController.login);
+console.log('Loading userController from:', path.join(__dirname, '..', 'controllers', 'user'));
 
-module.exports = { authRouter: router };
+let userController;
+try {
+    userController = require('../controllers/user');
+    console.log('userController loaded successfully');
+} catch (err) {
+    console.error('Failed to load userController:', err.message);
+    process.exit(1);
+}
+
+router.post('/register', userController.register); 
+router.post('/login', userController.login); 
+
+console.log('authRoutes mounted: /register, /login');
+
+module.exports = router;

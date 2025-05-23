@@ -1,25 +1,51 @@
+// // middlewares/profileMiddleware.js
+// const jwt = require('jsonwebtoken');
+// const User = require('../model/user');
+
+// const profileMiddleware = async (req, res, next) => {
+//   try {
+//     const token = req.header('Authorization').replace('Bearer ', '');
+//     if (!token) {
+//       return res.status(401).json({ message: 'Authentication required' });
+//     }
+
+//     const decoded = jwt.verify(token, 'secret_key');
+//     const user = await User.findById(decoded.id);
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+
+//     req.user = user;
+//     next();
+//   } catch (error) {
+//     return res.status(400).json({ message: 'Invalid or expired token' });
+//   }
+// };
+
+// module.exports = profileMiddleware;
+// middlewares/profileMiddleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../model/User'); // Fixed typo in path
+const User = require('../model/User');
 
 const profileMiddleware = async (req, res, next) => {
-  try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
+    try {
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).json({ message: 'Authentication required' });
+        }
 
-    const decoded = jwt.verify(token, 'secret_key'); // Consider using env variable for secret
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
+        const user = await User.findById(decoded.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-    req.user = user; // Attach full user object
-    next();
-  } catch (error) {
-    console.error('Error in profileMiddleware:', error);
-    return res.status(400).json({ message: 'Invalid or expired token' });
-  }
+        req.user = user;
+        next();
+    } catch (error) {
+        console.error('JWT verification error:', error);
+        return res.status(401).json({ message: 'Invalid or expired token' });
+    }
 };
 
 module.exports = profileMiddleware;

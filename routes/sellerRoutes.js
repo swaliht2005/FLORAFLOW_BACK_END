@@ -1,5 +1,4 @@
 
-
 const express = require('express');
 const {
   addSellerProduct,
@@ -9,7 +8,7 @@ const {
   getSellerProductById,
   getSellerProductImage,
 } = require('../controllers/SellerController');
-const upload = require('../middlewares/fileUploadMiddleware'); // Import Multer instance directly
+const upload = require('../middlewares/fileUploadMiddleware');
 
 const router = express.Router();
 
@@ -31,4 +30,4 @@ router.get('/:id', getSellerProductById);
 router.get('/:id/image', getSellerProductImage);
 router.delete('/:id', deleteSellerProduct);
 
-module.exports = { sellerRouter: router };
+module.exports = router; // Export router directly
