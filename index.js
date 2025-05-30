@@ -2,9 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const connectMongoDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const profileRoutes = require('./routes/profileRoutes');
-const sellerRoutes = require('./routes/sellerRoutes'); // Add sellerRoutes import
+const apiRoutes = require('./routes/server');
 const path = require('path');
 
 const PORT = 5000;
@@ -18,14 +16,8 @@ app.use((req, res, next) => {
     next();
 });
 
-console.log('Mounting authRoutes at /api/user');
-app.use('/api/user', authRoutes);
-
-console.log('Mounting profileRoutes at /api/profile');
-app.use('/api/profile', profileRoutes);
-
-console.log('Mounting sellerRoutes at /api/seller');
-app.use('/api/seller', sellerRoutes); // Mount sellerRoutes
+console.log('Mounting apiRoutes at /api');
+app.use('/api', apiRoutes);
 
 app.use('/api/uploads', express.static(path.join(__dirname, 'Uploads')));
 

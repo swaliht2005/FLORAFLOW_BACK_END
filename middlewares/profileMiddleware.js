@@ -1,50 +1,21 @@
-// // middlewares/profileMiddleware.js
-// const jwt = require('jsonwebtoken');
-// const User = require('../model/user');
 
-// const profileMiddleware = async (req, res, next) => {
-//   try {
-//     const token = req.header('Authorization').replace('Bearer ', '');
-//     if (!token) {
-//       return res.status(401).json({ message: 'Authentication required' });
-//     }
-
-//     const decoded = jwt.verify(token, 'secret_key');
-//     const user = await User.findById(decoded.id);
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-
-//     req.user = user;
-//     next();
-//   } catch (error) {
-//     return res.status(400).json({ message: 'Invalid or expired token' });
-//   }
-// };
-
-// module.exports = profileMiddleware;
-// middlewares/profileMiddleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../model/User');
 
-const profileMiddleware = async (req, res, next) => {
+const profileMiddleware = (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    if (!token) {
+        console.error('No token provided');
+        return res.status(401).json({ success: false, error: 'Authentication required: No token provided' });
+    }
+
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
-        if (!token) {
-            return res.status(401).json({ message: 'Authentication required' });
-        }
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
-        const user = await User.findById(decoded.id);
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        req.user = user;
+        console.log('Middleware decoded user:', decoded);
+        req.user = decoded;
         next();
     } catch (error) {
-        console.error('JWT verification error:', error);
-        return res.status(401).json({ message: 'Invalid or expired token' });
+        console.error('Middleware error:', error.message);
+        res.status(401).json({ success: false, error: 'Invalid token' });
     }
 };
 
